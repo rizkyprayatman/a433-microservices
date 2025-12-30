@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci --only=production && \
+RUN npm install --production --no-optional && \
     npm install -g serve@14.2.1
 
 COPY . .
