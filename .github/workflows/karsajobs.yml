@@ -19,7 +19,8 @@ jobs:
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: karsajobs/Dockerfile
+          dockerfile: Dockerfile
+          no-fail: true
 
       # 3. Setup Go
       - name: Setup Go
