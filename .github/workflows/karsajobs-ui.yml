@@ -14,6 +14,8 @@ jobs:
       # 1. Checkout source code
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: karsajobs-ui
 
       # 2. Lint Dockerfile
       - name: Lint Dockerfile
