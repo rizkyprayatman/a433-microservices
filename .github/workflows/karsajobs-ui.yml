@@ -1,0 +1,43 @@
+name: CI/CD KarsaJobs Frontend
+
+on:
+  push:
+    branches:
+      - karsajobs-ui
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Lint Dockerfile
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      # 3. Login to GHCR
+      - name: Login to GHCR
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
+      # 4. Build & push image
+      - name: Build and push image
+        run: |
+          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/karsajobs-ui:latest .
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/karsajobs-ui:latest
+
+      # 5. Deploy to Kubernetes
+      - name: Deploy to Kubernetes
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/kubernetes
+            kubectl apply -f .
+            kubectl rollout restart deployment/karsajobs-ui
