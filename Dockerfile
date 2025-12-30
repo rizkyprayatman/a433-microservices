@@ -13,6 +13,8 @@ RUN npm run build
 # Install static server
 RUN npm install -g serve
 
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Port
 EXPOSE 8080
 
