@@ -1,0 +1,53 @@
+name: CI/CD KarsaJobs Backend
+
+on:
+  push:
+    branches:
+      - karsajobs
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Lint Dockerfile
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      # 3. Setup Go
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      # 4. Run unit tests
+      - name: Run unit tests
+        run: go test -v -short --count=1 $(go list ./...)
+
+      # 5. Login to GHCR
+      - name: Login to GHCR
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
+      # 6. Build & push image
+      - name: Build and push image
+        run: |
+          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/karsajobs:latest .
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/karsajobs:latest
+
+      # 7. Deploy to Kubernetes (Minikube via EC2)
+      - name: Deploy to Kubernetes
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/kubernetes
+            kubectl apply -f .
+            kubectl rollout restart deployment/karsajobs
