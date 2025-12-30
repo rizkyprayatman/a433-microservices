@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - karsajobs
+  workflow_dispatch:
 
 jobs:
   backend:
