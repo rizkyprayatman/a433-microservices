@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - karsajobs-ui
+  workflow_dispatch:
 
 jobs:
   frontend:
