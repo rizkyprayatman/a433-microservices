@@ -15,6 +15,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug - List files
+        run: |
+          echo "=== Current Directory ==="
+          pwd
+          echo "=== All Files ==="
+          ls -la
+          echo "=== Find Dockerfile ==="
+          find . -name "Dockerfile*" -type f
+
       # 2. Lint Dockerfile
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
